@@ -1,74 +1,72 @@
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.24;
 
 contract CRUD_Student {
     struct Student {
-        uint id;
+        uint256 id;
         string name;
     }
 
-    Student[] private _students;
-
-    uint private _totalStudents;
+    Student[] public students;
+    uint256 public totalStudent;
 
     constructor() {
-        _totalStudents = 0;
+        totalStudent = 0;
     }
 
-    event AddEvent(uint id, string name);
-    event UpdateEvent(uint id, string name);
-    event DeleteEvent(uint id);
-
-    function addStudent(uint id, string memory name) public returns (bool) {
-        Student memory newStudent = Student(id, name);
-        _students.push(newStudent);
-        _totalStudents++;
-
-        emit AddEvent(id, name);
+    function createStudent(
+        uint256 _id,
+        string memory _name
+    ) external returns (bool) {
+        Student memory newStudent = Student(_id, _name);
+        students.push(newStudent);
+        totalStudent++;
         return true;
     }
 
     function updateStudent(
-        uint id,
-        string memory name
-    ) public returns (bool success) {
-        for (uint i = 0; i < _students.length; i++) {
-            if (_students[i].id == id) {
-                _students[i].name = name;
-                emit UpdateEvent(id, name);
+        uint256 _id,
+        string memory _name
+    ) external returns (bool) {
+        for (uint i = 0; i < students.length; i++) {
+            if (students[i].id == _id) {
+                students[i].name = _name;
                 return true;
             }
         }
         return false;
     }
 
-    function deleteStudent(uint id) public returns (bool success) {
-        require(_students.length > 0, "No student to delete");
-        require(id <= _totalStudents, "Student does not exist");
-
-        for (uint i = id; i < _totalStudents - 1; i++) {
-            _students[i] = _students[i + 1];
+    function deleteStudent(uint256 _id) external returns (bool) {
+        for (uint i = 0; i < students.length; i++) {
+            if (students[i].id == _id) {
+                for (uint j = i; j < students.length - 1; j++) {
+                    students[j] = students[j + 1];
+                }
+                totalStudent--;
+                students.pop();
+                return true;
+            }
         }
-        _students.pop();
-        _totalStudents--;
-
         return false;
     }
 
-    function getStudent(uint id) public view returns (Student memory) {
-      for (uint i = 0; i < _totalStudents; i++) {
-        if (_students[i].id == id) {
-          return _students[i];
+    function getStudent(
+        uint256 _id
+    ) external view returns (uint256, string memory) {
+        for (uint i = 0; i < students.length; i++) {
+            if (students[i].id == _id) {
+                return (students[i].id, students[i].name);
+            }
         }
-      }
-      revert("Student does not exist");
+        revert("Student not found");
     }
 
-    function getTotalStudents() public view returns (uint) {
-        return _totalStudents;
+    function getAllStudent() external view returns (Student[] memory) {
+        return students;
     }
 
-    function getAllStudents() public view returns (Student[] memory) {
-        return _students;
+    function getTotalStudent() external view returns (uint256) {
+        return totalStudent;
     }
 }
